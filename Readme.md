@@ -1,18 +1,7 @@
-#  GrowEdge : Agriculture Platform 
-
-## Overview
-
-**GrowEdge** is a full-stack web application for agriculture rentals, shopping, and farm management. It includes a React frontend with Material UI and a Node.js + Express + MongoDB backend. The platform allows users to:
-
-* Browse and purchase agricultural products
-* Rent farm equipment or land
-* Manage orders and track activities
-
-Admins can monitor users, owners, and revenue.
 
 # GrowEdge : Agriculture Platform
 
-## Purpose
+## Overview
 
 A platform connecting *Farmers, Equipment Owners, Shopkeepers, and Admins* to manage *equipment renting, product shopping, and revenue tracking*, with role-based dashboards and analytics.
 
