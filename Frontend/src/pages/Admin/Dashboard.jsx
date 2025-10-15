@@ -130,10 +130,10 @@ const AdminDashboard = () => {
               <Card>
                 <CardContent>
                   <Typography variant="h6">{report.title}</Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Date: {report.date}
+                  <Typography variant="body2" color="textS econdary">
+                    Date: {report.date}  
                   </Typography>
-                  <Chip
+                  <Chip  
                     label={report.status}
                     color={report.status === "Completed" ? "success" : "warning"}
                     sx={{ mt: 1 }}
