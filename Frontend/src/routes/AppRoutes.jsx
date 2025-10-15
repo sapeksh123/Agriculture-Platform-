@@ -11,14 +11,14 @@ import AdminDashboard from "../pages/Admin/Dashboard";
 const AppRoutes = () => {
   return (
     <Router>
-      <Routes>
+      <Routes>  
         <Route path="/" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         {/* <Route path="/owner/dashboard" element={<OwnerDashboard />} />
         <Route path="/shopkeeper/dashboard" element={<ShopkeeperDashboard />} />
-        <Route path="/farmer/dashboard" element={<FarmerDashboard />} /> */}
+        <Route path="/farmer/dashbo ard" element={<FarmerDashboard />} /> */}
       </Routes>
     </Router>
   );
