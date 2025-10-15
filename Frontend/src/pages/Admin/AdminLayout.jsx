@@ -7,7 +7,7 @@ export default function AdminLayout({ children }) {
   return (
     <Box sx={{ display: "flex" }}>
       <Sidebar role="admin" />
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>  
         {children}
       </Box>
     </Box>
