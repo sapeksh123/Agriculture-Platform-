@@ -11,7 +11,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(role, email);
+    login(role, email);   
 
     switch (role) {
       case "admin":
