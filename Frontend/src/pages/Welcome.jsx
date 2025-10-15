@@ -12,7 +12,7 @@ const Welcome = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "center",    
         textAlign: "center",
       }}
     >
