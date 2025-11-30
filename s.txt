@@ -1,0 +1,39 @@
+agriculture-backend/
+│
+├── src/
+│   ├── config/
+│   │   ├── db.js                  # MongoDB connection setup
+│   │   ├── dotenv.js              # Environment variable config (optional)
+│   │
+│   ├── models/
+│   │   ├── user.model.js          # User schema (with roles)
+│   │   ├── product.model.js       # Example: product or crop model (future use)
+│   │
+│   ├── controllers/
+│   │   ├── auth.controller.js     # Signup/Login logic
+│   │   ├── user.controller.js     # Admin/Owner actions (create users, etc.)
+│   │
+│   ├── middlewares/
+│   │   ├── auth.middleware.js     # JWT verification
+│   │   ├── role.middleware.js     # Role-based access control
+│   │   ├── error.middleware.js    # Centralized error handling
+│   │
+│   ├── routes/
+│   │   ├── auth.routes.js         # Login, Signup
+│   │   ├── user.routes.js         # Admin/Owner/Shopkeeper operations
+│   │   ├── index.js               # Combine all routes
+│   │
+│   ├── utils/
+│   │   ├── generateToken.js       # JWT creation helper
+│   │   ├── responseHandler.js     # Consistent API responses
+│   │
+│   ├── seed/
+│   │   ├── admin.seed.js          # Initial admin creation
+│   │
+│   ├── app.js                     # Express app setup
+│   ├── server.js                  # Entry point (starts server)
+│
+├── .env                           # Environment variables (DB URI, JWT secret)
+├── .gitignore
+├── package.json
+└── README.md
