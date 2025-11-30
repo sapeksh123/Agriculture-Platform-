@@ -1,151 +1,79 @@
-// src/pages/Admin/Dashboard.jsx
-import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Chip,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { IoChevronForward, IoPeople, IoBuild, IoCar, IoTrendingUp } from "react-icons/io5";
 
-const AdminDashboard = () => {
-  // Example data
-  const users = [
-    { id: 1, name: "John Doe", role: "User", status: "Active" },
-    { id: 2, name: "Jane Smith", role: "Moderator", status: "Inactive" },
-    { id: 3, name: "Mike Johnson", role: "User", status: "Active" },
+const Dashboard = () => {
+  const navigate = useNavigate();
+
+  const stats = [
+    { label: "Total Users", value: "125", icon: IoPeople, color: "bg-blue-500", trend: "+12%" },
+    { label: "Total Equipment", value: "75", icon: IoBuild, color: "bg-green-500", trend: "+8%" },
+    { label: "Total Vehicles", value: "50", icon: IoCar, color: "bg-purple-500", trend: "+5%" },
   ];
 
-  const reports = [
-    { id: 1, title: "Sales Report", date: "2025-10-15", status: "Completed" },
-    { id: 2, title: "User Activity", date: "2025-10-14", status: "Pending" },
-    { id: 3, title: "System Logs", date: "2025-10-13", status: "Completed" },
+  const manageItems = [
+    { label: "Manage Users", path: "/admin/users", icon: IoPeople, color: "text-blue-600" },
+    { label: "Manage Equipment", path: "/admin/equipment", icon: IoBuild, color: "text-green-600" },
+    { label: "Manage Vehicles", path: "/admin/vehicles", icon: IoCar, color: "text-purple-600" },
+    { label: "Manage Shops", path: "/admin/shops", icon: IoTrendingUp, color: "text-orange-600" },
   ];
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" color="primary" gutterBottom>
-        Admin Dashboard
-      </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        Welcome Admin, manage users and reports here.
-      </Typography>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+        </div>
 
-      {/* Stats Cards */}
-      <Grid container spacing={2} sx={{ my: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: "#e3f2fd" }}>
-            <CardContent>
-              <Typography variant="h6">Total Users</Typography>
-              <Typography variant="h4">120</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: "#fff3e0" }}>
-            <CardContent>
-              <Typography variant="h6">Active Reports</Typography>
-              <Typography variant="h4">8</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: "#e8f5e9" }}>
-            <CardContent>
-              <Typography variant="h6">Pending Approvals</Typography>
-              <Typography variant="h4">5</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: "#fce4ec" }}>
-            <CardContent>
-              <Typography variant="h6">System Alerts</Typography>
-              <Typography variant="h4">2</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Users Table */}
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Manage Users
-        </Typography>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.id}</TableCell>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={user.status}
-                      color={user.status === "Active" ? "success" : "default"}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="contained" size="small" sx={{ mr: 1 }}>
-                      Edit
-                    </Button>
-                    <Button variant="outlined" size="small" color="error">
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-
-      {/* Reports Section */}
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Recent Reports
-        </Typography>
-        <Grid container spacing={2}>
-          {reports.map((report) => (
-            <Grid item xs={12} sm={6} md={4} key={report.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">{report.title}</Typography>
-                  <Typography variant="body2" color="textS econdary">
-                    Date: {report.date}  
-                  </Typography>
-                  <Chip  
-                    label={report.status}
-                    color={report.status === "Completed" ? "success" : "warning"}
-                    sx={{ mt: 1 }}
-                  />
-                </CardContent>
-              </Card>
-            </Grid>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition border border-gray-100"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`${stat.color} w-12 h-12 rounded-xl flex items-center justify-center`}>
+                  <stat.icon className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-green-600 text-sm font-semibold flex items-center">
+                  <IoTrendingUp className="w-4 h-4 mr-1" />
+                  {stat.trend}
+                </span>
+              </div>
+              <p className="text-gray-600 text-sm mb-1">{stat.label}</p>
+              <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+            </div>
           ))}
-        </Grid>
-      </Box>
-    </Box>
+        </div>
+
+        {/* Manage Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {manageItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => navigate(item.path)}
+                className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition group"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center group-hover:bg-gray-100 transition">
+                    <item.icon className={`w-5 h-5 ${item.color}`} />
+                  </div>
+                  <span className="text-gray-900 font-medium">{item.label}</span>
+                </div>
+                <IoChevronForward className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;
