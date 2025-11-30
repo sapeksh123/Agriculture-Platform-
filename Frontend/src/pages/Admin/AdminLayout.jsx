@@ -1,15 +1,24 @@
-// src/pages/Admin/AdminLayout.jsx
-import React from "react";
-import { Box } from "@mui/material";
+import { Outlet } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+import BottomNav from "../../components/BottomNav";
 
-export default function AdminLayout({ children }) {
+const AdminLayout = () => {
   return (
-    <Box sx={{ display: "flex" }}>
-      <Sidebar role="admin" />
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>  
-        {children}
-      </Box>
-    </Box>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <Sidebar />
+      
+      {/* Main Content */}
+      <main className="pt-16 md:pl-64">
+        <div className="pb-20 md:pb-6">
+          <Outlet />
+        </div>
+      </main>
+      
+      <BottomNav />
+    </div>
   );
-}
+};
+
+export default AdminLayout;
