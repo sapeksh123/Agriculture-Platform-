@@ -24,6 +24,14 @@ const ownerSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    ownerImage:{
+      type:String,
+      default:"",
+    },
+    shopImage:{
+      type:String,
+      default:"",
+    },
     status: {
       type: String,
       enum: ["active", "inactive"],
