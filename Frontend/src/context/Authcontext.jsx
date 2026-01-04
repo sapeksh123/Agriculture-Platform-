@@ -6,28 +6,45 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
 
-  // 🟢 Load user from localStorage when app starts
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+
+  // 🟢 Load auth state on app start (classic pattern)
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem("token");
+    
+    // Fallback to sessionStorage if localStorage is empty
+    const sessionUser = sessionStorage.getItem("user");
+    const sessionToken = sessionStorage.getItem("token");
+
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      setToken(storedToken);
+    } else if (sessionUser && sessionToken) {
+      setUser(JSON.parse(sessionUser));
+      setToken(sessionToken);
+    }
   }, []);
 
-  // 🟢 Login logic (role-based redirect)
-  const login = (email, password) => {
-    let role = "user";
+  // 🟢 Central auth setter (used after login / register)
+  const setAuth = ({ user, token }) => {
+    setUser(user);
+    setToken(token);
 
-    if (email.includes("admin")) role = "admin";
-    else if (email.includes("farmer")) role = "farmer";
-    else if (email.includes("shop")) role = "shopkeeper";
-    else if (email.includes("owner")) role = "owner";
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", token);
+    
+    // Also save to sessionStorage as backup
+    sessionStorage.setItem("user", JSON.stringify(user));
+    sessionStorage.setItem("token", token);
 
-    const loggedUser = { email, role };
-    setUser(loggedUser);
-    localStorage.setItem("user", JSON.stringify(loggedUser));
+    redirectByRole(user.role);
+  };
 
-    // Redirect according to role
+  // 🟢 Role-based redirect (single source of truth)
+  const redirectByRole = (role) => {
     switch (role) {
       case "admin":
         navigate("/admin/dashboard");
@@ -47,15 +64,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🟠 Logout logic
+  // 🟢 Login helper (optional use if you want API outside)
+  const loginWithResponse = (data) => {
+    // data = { token, user }
+    if (!data?.token || !data?.user) return;
+    setAuth(data);
+  };
+
+  // 🟠 Logout (clean & complete)
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
     setUser(null);
+    setToken(null);
+
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        setAuth,
+        loginWithResponse,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

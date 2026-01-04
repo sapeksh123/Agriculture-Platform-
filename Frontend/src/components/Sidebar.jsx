@@ -1,18 +1,27 @@
+import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { IoHome, IoPeople, IoBuild, IoCar, IoStorefront, IoSettings } from "react-icons/io5";
+import { IoLogOutOutline } from "react-icons/io5";
+import menuItems from "../config/menuItems";
+import { AuthContext } from "../context/Authcontext";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useContext(AuthContext);
 
-  const navItems = [
-    { label: "Dashboard", icon: IoHome, path: "/admin/dashboard" },
-    { label: "Users", icon: IoPeople, path: "/admin/users" },
-    { label: "Equipment", icon: IoBuild, path: "/admin/equipment" },
-    { label: "Vehicles", icon: IoCar, path: "/admin/vehicles" },
-    { label: "Shops", icon: IoStorefront, path: "/admin/shops" },
-    { label: "Settings", icon: IoSettings, path: "/admin/settings" },
-  ];
+  // Get menu items based on user role
+  const navItems = user?.role ? (menuItems[user.role] || []) : [];
+
+  // If no user or items, show empty sidebar
+  if (!user || !navItems.length) {
+    return (
+      <aside className="hidden md:flex fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 flex-col">
+        <div className="flex-1 overflow-y-auto py-6 px-3 text-center text-gray-400 flex items-center justify-center">
+          {/* Loading state - user might still be loading */}
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="hidden md:flex fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 flex-col">
@@ -20,6 +29,7 @@ const Sidebar = () => {
         <nav className="space-y-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const IconComponent = item.icon;
             return (
               <button
                 key={item.path}
@@ -30,12 +40,30 @@ const Sidebar = () => {
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                <item.icon className="w-5 h-5" />
+                {IconComponent && (
+                  <IconComponent
+                    sx={{
+                      fontSize: 20,
+                      color: isActive ? "#16a34a" : "inherit",
+                    }}
+                  />
+                )}
                 <span>{item.label}</span>
               </button>
             );
           })}
         </nav>
+      </div>
+      
+      {/* Logout Button at Bottom */}
+      <div className="border-t border-gray-200 p-3">
+        <button
+          onClick={logout}
+          className="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+        >
+          <IoLogOutOutline className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );
