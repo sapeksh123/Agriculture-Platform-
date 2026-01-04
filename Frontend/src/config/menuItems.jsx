@@ -1,4 +1,4 @@
-// src/config/menuItems.js
+// src/config/menuItems.jsx
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
