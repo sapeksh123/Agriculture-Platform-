@@ -51,27 +51,22 @@ export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return errorResponse(res, "Please provide email and password", 400);
     }
 
-    // Find user by email
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return errorResponse(res, "Invalid email or password", 401);
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return errorResponse(res, "Invalid email or password", 401);
     }
 
-    // Generate token
     const token = generateToken(user._id, user.role);
 
-    // Send success response
     return successResponse(res, "Login successful", {
       token,
       role: user.role

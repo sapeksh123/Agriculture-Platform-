@@ -3,9 +3,7 @@ import Owner from "../models/OwnerModel.js";
 import Shopkeeper from "../models/ShopkeeperModel.js";
 import { successResponse, errorResponse } from "../utils/responseHandler.js";
 
-/* 
-   CREATE OWNER
-*/
+//CREATE OWNER
 export const createOwner = async (req, res, next) => {
   try {
     const {
@@ -18,7 +16,6 @@ export const createOwner = async (req, res, next) => {
       aadharNumber,
     } = req.body;
 
-    // 1️⃣ Validation
     if (
       !name ||
       !email ||
@@ -31,13 +28,11 @@ export const createOwner = async (req, res, next) => {
       return errorResponse(res, "All fields are required", 400);
     }
 
-    // 2️⃣ Check existing user
     const userExists = await User.findOne({ email });
     if (userExists) {
       return errorResponse(res, "User already exists", 400);
     }
 
-    // 3️⃣ Create User
     const user = await User.create({
       name,
       email,
@@ -45,11 +40,9 @@ export const createOwner = async (req, res, next) => {
       role: "owner",
     });
 
-    // 4️⃣ Get image URLs from Cloudinary
     const ownerImage = req.files?.ownerImage?.[0]?.path || "";
     const shopImage = req.files?.shopImage?.[0]?.path || "";
 
-    // 5️⃣ Create Owner profile
     const owner = await Owner.create({
       user: user._id,
       businessName,
@@ -60,16 +53,13 @@ export const createOwner = async (req, res, next) => {
       shopImage,
     });
 
-    // 6️⃣ Response
     return successResponse(res, "Owner created successfully", { owner }, 201);
   } catch (error) {
     next(error);
   }
 };
 
-/* 
-   CREATE SHOPKEEPER
-*/
+//   CREATE SHOPKEEPER
 export const createShopkeeper = async (req, res, next) => {
   try {
     const {
@@ -119,15 +109,18 @@ export const createShopkeeper = async (req, res, next) => {
       shopImage,
     });
 
-    return successResponse(res, "Shopkeeper created successfully", { shopkeeper }, 201);
+    return successResponse(
+      res,
+      "Shopkeeper created successfully",
+      { shopkeeper },
+      201
+    );
   } catch (error) {
     next(error);
   }
 };
 
-/* 
-   GET ALL OWNERS
-  */
+//   GET ALL OWNERS
 export const getAllOwners = async (req, res, next) => {
   try {
     const owners = await Owner.find().populate("user", "name email role");
@@ -137,9 +130,7 @@ export const getAllOwners = async (req, res, next) => {
   }
 };
 
-/* 
-   GET OWNER BY ID
-*/
+//   GET OWNER BY ID
 export const getOwnerById = async (req, res, next) => {
   try {
     const owner = await Owner.findById(req.params.id).populate(
@@ -157,24 +148,22 @@ export const getOwnerById = async (req, res, next) => {
   }
 };
 
-/* 
-   GET ALL SHOPKEEPERS
- */
+//GET ALL SHOPKEEPERS
 export const getAllShopkeepers = async (req, res, next) => {
   try {
     const shopkeepers = await Shopkeeper.find().populate(
       "user",
       "name email role"
     );
-    return successResponse(res, "Shopkeepers fetched successfully", { shopkeepers });
+    return successResponse(res, "Shopkeepers fetched successfully", {
+      shopkeepers,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-/* 
-   GET SHOPKEEPER BY ID
- */
+// GET SHOPKEEPER BY ID
 export const getShopkeeperById = async (req, res, next) => {
   try {
     const shopkeeper = await Shopkeeper.findById(req.params.id).populate(
@@ -186,15 +175,15 @@ export const getShopkeeperById = async (req, res, next) => {
       return errorResponse(res, "Shopkeeper not found", 404);
     }
 
-    return successResponse(res, "Shopkeeper fetched successfully", { shopkeeper });
+    return successResponse(res, "Shopkeeper fetched successfully", {
+      shopkeeper,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-/* 
-   TOGGLE OWNER STATUS
- */
+//TOGGLE OWNER STATUS
 export const toggleOwnerStatus = async (req, res, next) => {
   try {
     const owner = await Owner.findById(req.params.id);
@@ -211,9 +200,8 @@ export const toggleOwnerStatus = async (req, res, next) => {
   }
 };
 
-/* 
-   TOGGLE SHOPKEEPER STATUS
-*/
+//TOGGLE SHOPKEEPER STATUS
+
 export const toggleShopkeeperStatus = async (req, res, next) => {
   try {
     const shopkeeper = await Shopkeeper.findById(req.params.id);
@@ -221,8 +209,7 @@ export const toggleShopkeeperStatus = async (req, res, next) => {
       return errorResponse(res, "Shopkeeper not found", 404);
     }
 
-    shopkeeper.status =
-      shopkeeper.status === "active" ? "inactive" : "active";
+    shopkeeper.status = shopkeeper.status === "active" ? "inactive" : "active";
     await shopkeeper.save();
 
     return successResponse(res, "Shopkeeper status updated", { shopkeeper });
@@ -231,7 +218,7 @@ export const toggleShopkeeperStatus = async (req, res, next) => {
   }
 };
 
-// update owner 
+// update owner
 
 export const updateOwner = async (req, res, next) => {
   try {
@@ -247,18 +234,15 @@ export const updateOwner = async (req, res, next) => {
       status,
     } = req.body;
 
-    // 1️⃣ Find owner + user
     const owner = await Owner.findById(id).populate("user");
     if (!owner) {
       return errorResponse(res, "Owner not found", 404);
     }
 
-    // 2️⃣ Update USER fields
     if (name) {
       owner.user.name = name;
     }
 
-    // ✅ Email update (SAFE)
     if (email && email !== owner.user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
@@ -269,14 +253,12 @@ export const updateOwner = async (req, res, next) => {
 
     await owner.user.save();
 
-    // 3️⃣ Update OWNER fields
     if (businessName) owner.businessName = businessName;
     if (address) owner.address = address;
     if (phoneNumber) owner.phoneNumber = phoneNumber;
     if (aadharNumber) owner.aadharNumber = aadharNumber;
     if (status) owner.status = status;
 
-    // 4️⃣ Image update
     if (req.files?.ownerImage) {
       owner.ownerImage = req.files.ownerImage[0].path;
     }
@@ -293,25 +275,29 @@ export const updateOwner = async (req, res, next) => {
   }
 };
 
-
-
 // update shopkeeper
 export const updateShopkeeper = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, shopName, address, phoneNumber, aadharNumber, status } = req.body;
+    const {
+      name,
+      email,
+      shopName,
+      address,
+      phoneNumber,
+      aadharNumber,
+      status,
+    } = req.body;
 
     const shopkeeper = await Shopkeeper.findById(id).populate("user");
     if (!shopkeeper) {
       return errorResponse(res, "Shopkeeper not found", 404);
     }
 
-    // ✅ Update name
     if (name) {
       shopkeeper.user.name = name;
     }
 
-    // ✅ Update email (NEW)
     if (email && email !== shopkeeper.user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
@@ -322,14 +308,12 @@ export const updateShopkeeper = async (req, res, next) => {
 
     await shopkeeper.user.save();
 
-    // Shopkeeper fields
     if (shopName) shopkeeper.shopName = shopName;
     if (address) shopkeeper.address = address;
     if (phoneNumber) shopkeeper.phoneNumber = phoneNumber;
     if (aadharNumber) shopkeeper.aadharNumber = aadharNumber;
     if (status) shopkeeper.status = status;
 
-    // Images
     if (req.files?.ownerImage) {
       shopkeeper.ownerImage = req.files.ownerImage[0].path;
     }
@@ -339,9 +323,10 @@ export const updateShopkeeper = async (req, res, next) => {
 
     await shopkeeper.save();
 
-    return successResponse(res, "Shopkeeper updated successfully", { shopkeeper });
+    return successResponse(res, "Shopkeeper updated successfully", {
+      shopkeeper,
+    });
   } catch (error) {
     next(error);
   }
 };
-
