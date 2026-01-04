@@ -1,446 +1,5 @@
-
-// import { useState, useEffect } from "react";
-// import {
-//   IoSearch,
-//   IoChevronDown,
-//   IoAdd,
-//   IoClose,
-// } from "react-icons/io5";
-// import toast from "react-hot-toast";
-// import { VITE_API_BASE_URL } from "../../utils/api";
-
-// const Users = () => {
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [showModal, setShowModal] = useState(false);
-//   const [formType, setFormType] = useState(""); // "shopkeeper" | "owner"
-//   const [selectedRole, setSelectedRole] = useState("owner"); // FILTER
-//   const [apiUsers, setApiUsers] = useState([]); // Dynamic Users from backend
-
-//   const token = sessionStorage.getItem("token");
-
-//   // ============================
-//   // FORM STATE
-//   // ============================
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     password: "",
-//     shopName: "",
-//     businessName: "",
-//     address: "",
-//     phoneNumber: "",
-//     aadharNumber: "",
-//   });
-
-//   // ============================
-//   // FETCH USERS (OWNER / SHOPKEEPER)
-//   // ============================
-//   const fetchUsers = async () => {
-//     try {
-//       const roleApi =
-//         selectedRole === "owner"
-//           ? `${VITE_API_BASE_URL}/admin/owner`
-//           : `${VITE_API_BASE_URL}/admin/shopkeeper`;
-
-//       const res = await fetch(roleApi, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-
-//       const data = await res.json();
-//       console.log("FETCHED USERS:", data);
-
-//       if (!data.success) {
-//         toast.error("Failed to load users");
-//         return;
-//       }
-
-//       if (selectedRole === "owner") setApiUsers(data.owners);
-//       if (selectedRole === "shopkeeper") setApiUsers(data.shopkeepers);
-//     } catch (error) {
-//       console.error(error);
-//       toast.error("Something went wrong while fetching users");
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchUsers();
-//   }, [selectedRole]);
-
-//   // ============================
-//   // RESET FORM
-//   // ============================
-//   const openModal = (type) => {
-//     setFormType(type);
-//     setFormData({
-//       name: "",
-//       email: "",
-//       password: "",
-//       shopName: "",
-//       businessName: "",
-//       address: "",
-//       phoneNumber: "",
-//       aadharNumber: "",
-//     });
-//     setShowModal(true);
-//   };
-
-//   // ============================
-//   // FORM CHANGE HANDLER
-//   // ============================
-//   const handleChange = (e) =>
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-
-//   // ============================
-//   // SUBMIT FORM (API CALL)
-//   // ============================
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     // Validation
-//     if (!formData.name || !formData.email || !formData.password || !formData.address) {
-//       toast.error("All required fields must be filled");
-//       return;
-//     }
-//     if (!/^[0-9]{10}$/.test(formData.phoneNumber)) {
-//       toast.error("Phone number must be 10 digits");
-//       return;
-//     }
-//     if (!/^[0-9]{12}$/.test(formData.aadharNumber)) {
-//       toast.error("Aadhar number must be 12 digits");
-//       return;
-//     }
-
-//     try {
-//       let url = "";
-//       let body = {
-//         name: formData.name,
-//         email: formData.email,
-//         password: formData.password,
-//         address: formData.address,
-//         phoneNumber: formData.phoneNumber,
-//         aadharNumber: formData.aadharNumber,
-//       };
-
-//       if (formType === "shopkeeper") {
-//         url = `${VITE_API_BASE_URL}/admin/shopkeeper`;
-//         body.shopName = formData.shopName;
-//       }
-//       if (formType === "owner") {
-//         url = `${VITE_API_BASE_URL}/admin/owner`;
-//         body.businessName = formData.businessName;
-//       }
-
-//       const res = await fetch(url, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${token}`,
-//         },
-//         body: JSON.stringify(body),
-//       });
-
-//       const data = await res.json();
-//       console.log("API RESPONSE:", data);
-
-//       if (!data.success) {
-//         toast.error(data.message || "Failed to create user");
-//         return;
-//       }
-
-//       toast.success(data.message);
-//       setShowModal(false);
-//       fetchUsers(); // refresh table
-
-//     } catch (error) {
-//       console.error(error);
-//       toast.error("Something went wrong");
-//     }
-//   };
-
-//   // ============================
-//   // ROLE BADGE COLORS
-//   // ============================
-//   const getRoleBadge = (role) => {
-//     const colors = {
-//       shopkeeper: "bg-orange-100 text-orange-700",
-//       owner: "bg-purple-100 text-purple-700",
-//     };
-//     return colors[role] || "bg-gray-100 text-gray-700";
-//   };
-
-//   return (
-//     <>
-//       {/* PAGE */}
-//       <div className="min-h-screen bg-gray-50">
-//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-//           {/* HEADER */}
-//           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-//             <div>
-//               <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-//               <p className="text-gray-600">Manage all platform users</p>
-//             </div>
-
-//             <button
-//               onClick={() => openModal("select")}
-//               className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
-//             >
-//               <IoAdd className="w-5 h-5" />
-//               <span>Add User</span>
-//             </button>
-//           </div>
-
-//           {/* FILTER */}
-//           <div className="mb-4 flex">
-//             <select
-//               value={selectedRole}
-//               onChange={(e) => setSelectedRole(e.target.value)}
-//               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-green-500"
-//             >
-//               <option value="owner">Owners</option>
-//               <option value="shopkeeper">Shopkeepers</option>
-//             </select>
-//           </div>
-
-//           {/* TABLE */}
-//           <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-
-//             {/* Search Bar */}
-//             <div className="p-4 border-b">
-//               <div className="relative">
-//                 <IoSearch className="absolute left-3 top-3 text-gray-400" />
-//                 <input
-//                   type="text"
-//                   placeholder="Search users..."
-//                   value={searchTerm}
-//                   onChange={(e) => setSearchTerm(e.target.value)}
-//                   className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-lg focus:ring-2 focus:ring-green-500"
-//                 />
-//               </div>
-//             </div>
-
-//             {/* SCROLLABLE TABLE */}
-//             <div className="overflow-x-auto max-h-[500px] scrollbar-thin scrollbar-thumb-gray-300">
-//               <table className="w-full">
-//                 <thead className="bg-gray-50 border-b">
-//                   <tr>
-//                     <th className="px-6 py-3 text-left text-xs font-bold uppercase text-gray-600">User</th>
-//                     <th className="px-6 py-3 text-left text-xs font-bold uppercase text-gray-600">Role</th>
-//                     <th className="px-6 py-3 text-left text-xs font-bold uppercase text-gray-600">Status</th>
-//                     <th className="px-6 py-3 text-left text-xs font-bold uppercase text-gray-600">Actions</th>
-//                   </tr>
-//                 </thead>
-
-//                 <tbody className="divide-y">
-//                   {apiUsers.map((user, index) => {
-//                     const u = user.user;
-
-//                     return (
-//                       <tr key={index} className="hover:bg-gray-50">
-//                         <td className="px-6 py-4">
-//                           <div className="flex items-center space-x-3">
-//                             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-700">
-//                               {u.name[0]}
-//                             </div>
-//                             <div>
-//                               <p className="font-semibold text-gray-900">{u.name}</p>
-//                               <p className="text-sm text-gray-500">{u.email}</p>
-//                             </div>
-//                           </div>
-//                         </td>
-
-//                         <td className="px-6 py-4">
-//                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getRoleBadge(selectedRole)}`}>
-//                             {selectedRole === "owner" ? "Owner" : "Shopkeeper"}
-//                           </span>
-//                         </td>
-
-//                         <td className="px-6 py-4">
-//                           <span
-//                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
-//                               user.status === "active"
-//                                 ? "bg-green-100 text-green-700"
-//                                 : "bg-gray-200 text-gray-700"
-//                             }`}
-//                           >
-//                             {user.status}
-//                           </span>
-//                         </td>
-
-//                         <td className="px-6 py-4">
-//                           <button className="text-green-600 hover:text-green-700 text-sm font-semibold">
-//                             View Details
-//                           </button>
-//                         </td>
-//                       </tr>
-//                     );
-//                   })}
-//                 </tbody>
-
-//               </table>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* ======================================================= */}
-//       {/* ===================== MODAL SECTION ==================== */}
-//       {/* ======================================================= */}
-
-//       {showModal && (
-//         <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4 z-50">
-//           <div className="bg-white w-full max-w-lg rounded-xl shadow-xl p-6 relative">
-
-//             {/* Close */}
-//             <button
-//               onClick={() => setShowModal(false)}
-//               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-//             >
-//               <IoClose size={25} />
-//             </button>
-
-//             {/* Choose User Type */}
-//             {formType === "select" && (
-//               <div className="text-center">
-//                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-//                   Choose User Type
-//                 </h2>
-
-//                 <div className="flex flex-col gap-4">
-//                   <button
-//                     onClick={() => setFormType("shopkeeper")}
-//                     className="py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
-//                   >
-//                     Create Shopkeeper
-//                   </button>
-
-//                   <button
-//                     onClick={() => setFormType("owner")}
-//                     className="py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-//                   >
-//                     Create Owner
-//                   </button>
-//                 </div>
-//               </div>
-//             )}
-
-//             {/* FORM */}
-//             {(formType === "shopkeeper" || formType === "owner") && (
-//               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-
-//                 <h2 className="text-xl font-bold text-center">
-//                   {formType === "shopkeeper" ? "Create Shopkeeper" : "Create Owner"}
-//                 </h2>
-
-//                 <input
-//                   type="text"
-//                   name="name"
-//                   placeholder="Full Name"
-//                   value={formData.name}
-//                   onChange={handleChange}
-//                   className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                   required
-//                 />
-
-//                 <input
-//                   type="email"
-//                   name="email"
-//                   placeholder="Email Address"
-//                   value={formData.email}
-//                   onChange={handleChange}
-//                   className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                   required
-//                 />
-
-//                 <input
-//                   type="text"
-//                   name="password"
-//                   placeholder="Password"
-//                   value={formData.password}
-//                   onChange={handleChange}
-//                   className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                   required
-//                 />
-
-//                 {formType === "shopkeeper" && (
-//                   <input
-//                     type="text"
-//                     name="shopName"
-//                     placeholder="Shop Name"
-//                     value={formData.shopName}
-//                     onChange={handleChange}
-//                     className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                     required
-//                   />
-//                 )}
-
-//                 {formType === "owner" && (
-//                   <input
-//                     type="text"
-//                     name="businessName"
-//                     placeholder="Business Name"
-//                     value={formData.businessName}
-//                     onChange={handleChange}
-//                     className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                     required
-//                   />
-//                 )}
-
-//                 <input
-//                   type="text"
-//                   name="address"
-//                   placeholder="Address"
-//                   value={formData.address}
-//                   onChange={handleChange}
-//                   className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                   required
-//                 />
-
-//                 <input
-//                   type="text"
-//                   name="phoneNumber"
-//                   placeholder="Phone Number (10 digits)"
-//                   value={formData.phoneNumber}
-//                   onChange={handleChange}
-//                   className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                   required
-//                 />
-
-//                 <input
-//                   type="text"
-//                   name="aadharNumber"
-//                   placeholder="Aadhar Number (12 digits)"
-//                   value={formData.aadharNumber}
-//                   onChange={handleChange}
-//                   className="w-full px-4 py-2 bg-gray-50 rounded-lg"
-//                   required
-//                 />
-
-//                 <button
-//                   type="submit"
-//                   className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-//                 >
-//                   {formType === "shopkeeper" ? "Create Shopkeeper" : "Create Owner"}
-//                 </button>
-
-//               </form>
-//             )}
-//           </div>
-//         </div>
-//       )}
-//     </>
-//   );
-// };
-
-// export default Users;
-
-
 import { useState, useEffect, useMemo } from "react";
-import {
-  IoSearch,
-  IoAdd,
-  IoClose,
-} from "react-icons/io5";
+import { IoSearch, IoAdd, IoClose } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { VITE_API_BASE_URL } from "../../utils/api";
 
@@ -449,12 +8,14 @@ const Users = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [formType, setFormType] = useState(""); // "shopkeeper" | "owner"
+  const [selectedItemData, setSelectedItemData] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("owner"); // filter
   const [apiUsers, setApiUsers] = useState([]); // list from backend
   const [loading, setLoading] = useState(false);
 
   // Pagination
-  const PER_PAGE = 3; // as requested
+  const PER_PAGE = 4; // as requested
   const [page, setPage] = useState(1);
 
   // token for protected routes
@@ -511,8 +72,14 @@ const Users = () => {
   }, [selectedRole]);
 
   // --- Helpers ---
-  const handleChange = (e) =>
-    setFormData((s) => ({ ...s, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, type, value, files } = e.target;
+    if (type === "file") {
+      setFormData((s) => ({ ...s, [name]: files && files[0] ? files[0] : null }));
+    } else {
+      setFormData((s) => ({ ...s, [name]: value }));
+    }
+  };
 
   const openModal = (type) => {
     setFormType(type);
@@ -526,6 +93,12 @@ const Users = () => {
       phoneNumber: "",
       aadharNumber: "",
     });
+    setShowModal(true);
+  };
+
+  const openDetailsModal = (data) => {
+    setSelectedItemData(data || null);
+    setFormType("details");
     setShowModal(true);
   };
 
@@ -576,24 +149,26 @@ const Users = () => {
           ? `${VITE_API_BASE_URL}/admin/owner`
           : `${VITE_API_BASE_URL}/admin/shopkeeper`;
 
-      const body = {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        address: formData.address,
-        phoneNumber: formData.phoneNumber,
-        aadharNumber: formData.aadharNumber,
-        ...(formType === "owner" ? { businessName: formData.businessName } : {}),
-        ...(formType === "shopkeeper" ? { shopName: formData.shopName } : {}),
-      };
+      // Use FormData because backend accepts form-data with files (ownerImage/shopImage)
+      const form = new FormData();
+      form.append("name", formData.name || "");
+      form.append("email", formData.email || "");
+      form.append("password", formData.password || "");
+      form.append("address", formData.address || "");
+      form.append("phoneNumber", formData.phoneNumber || "");
+      form.append("aadharNumber", formData.aadharNumber || "");
+      if (formType === "owner") form.append("businessName", formData.businessName || "");
+      if (formType === "shopkeeper") form.append("shopName", formData.shopName || "");
+
+      if (formData.ownerImage) form.append("ownerImage", formData.ownerImage);
+      if (formData.shopImage) form.append("shopImage", formData.shopImage);
 
       const res = await fetch(url, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(body),
+        body: form,
       });
 
       const data = await res.json();
@@ -610,6 +185,28 @@ const Users = () => {
     } catch (err) {
       console.error("Create user error (safe):", err.message || err);
       toast.error("Something went wrong");
+    }
+  };
+
+  // --- View details by id (owner/shopkeeper) ---
+  const handleViewDetails = async (item) => {
+    if (!item?._id) return;
+    setDetailsLoading(true);
+    try {
+      const url = `${VITE_API_BASE_URL}/admin/${selectedRole}/${item._id}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.message || "Failed to fetch details");
+        return;
+      }
+      const payload = data.owner || data.shopkeeper || null;
+      openDetailsModal(payload);
+    } catch (err) {
+      console.error("View details error (safe):", err.message || err);
+      toast.error("Unable to fetch details");
+    } finally {
+      setDetailsLoading(false);
     }
   };
 
@@ -693,13 +290,21 @@ const Users = () => {
                 </button>
               </div>
 
-              <button
-                onClick={() => openModal("select")}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
-              >
-                <IoAdd className="w-5 h-5" />
-                <span>Add User</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => openModal("owner")}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-full shadow-lg"
+                >
+                  <span className="font-semibold">+ Add Owner</span>
+                </button>
+
+                <button
+                  onClick={() => openModal("shopkeeper")}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-full shadow-lg"
+                >
+                  <span className="font-semibold">+ Add Shopkeeper</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -721,17 +326,19 @@ const Users = () => {
               </div>
             </div>
 
-            {/* Scrollable table */}
+            {/* Scrollable table with fixed height */}
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-100">
+             <div className="h-[50vh] overflow-y-auto">
+
+                <table className="w-full">
+                  <thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-100">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">User</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
                   </tr>
-                </thead>
+                  </thead>
 
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
@@ -794,8 +401,8 @@ const Users = () => {
                           </td>
 
                           <td className="px-6 py-4">
-                            <button className="text-green-600 hover:text-green-700 font-medium text-sm">
-                              View Details
+                            <button onClick={() => handleViewDetails(item)} className="text-green-600 hover:text-green-700 font-medium text-sm">
+                              {detailsLoading ? "Loading..." : "View Details"}
                             </button>
                           </td>
                         </tr>
@@ -804,6 +411,7 @@ const Users = () => {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* Pagination footer */}
@@ -873,6 +481,60 @@ const Users = () => {
               </div>
             )}
 
+            {formType === "details" && (
+              <div className="mt-2">
+                <div className="flex items-start gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold text-gray-900">{selectedItemData?.user?.name || "User Details"}</h2>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadge(selectedRole)}`}>
+                        {selectedRole === "owner" ? "Owner" : "Shopkeeper"}
+                      </span>
+                    </div>
+
+                    {detailsLoading ? (
+                      <div className="text-gray-500 mt-4">Loading...</div>
+                    ) : selectedItemData ? (
+                      <div className="grid grid-cols-1 gap-3 mt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-sm text-gray-600"><strong>Email:</strong> <div className="text-gray-800">{selectedItemData.user?.email}</div></div>
+                          <div className="text-sm text-gray-600"><strong>Status:</strong> <div className={`inline-block text-sm px-2 py-1 rounded ${selectedItemData?.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>{selectedItemData?.status || '-'}</div></div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-sm text-gray-600"><strong>Business / Shop:</strong> <div className="text-gray-800">{selectedItemData.businessName || selectedItemData.shopName || '-'}</div></div>
+                          <div className="text-sm text-gray-600"><strong>Phone:</strong> <div className="text-gray-800">{selectedItemData.phoneNumber || '-'}</div></div>
+                        </div>
+
+                        <div className="text-sm text-gray-600"><strong>Address:</strong> <div className="text-gray-800">{selectedItemData.address || '-'}</div></div>
+                        <div className="text-sm text-gray-600"><strong>Aadhar:</strong> <div className="text-gray-800">{selectedItemData.aadharNumber || '-'}</div></div>
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 mt-4">No details available</div>
+                    )}
+                  </div>
+
+                  <div className="w-48">
+                    <div className="bg-gray-50 rounded-lg p-3 h-full flex flex-col items-center gap-3">
+                      {selectedItemData?.ownerImage ? (
+                        <img src={selectedItemData.ownerImage} alt="owner" className="w-full h-36 object-cover rounded" />
+                      ) : (
+                        <div className="w-full h-36 bg-gray-200 rounded flex items-center justify-center text-gray-500">No Owner Image</div>
+                      )}
+
+                      {selectedItemData?.shopImage ? (
+                        <img src={selectedItemData.shopImage} alt="shop" className="w-full h-24 object-cover rounded" />
+                      ) : (
+                        <div className="w-full h-24 bg-gray-200 rounded flex items-center justify-center text-gray-500">No Shop Image</div>
+                      )}
+
+                      <button onClick={() => setShowModal(false)} className="mt-2 w-full py-2 bg-gray-100 text-gray-700 rounded">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {(formType === "shopkeeper" || formType === "owner") && (
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <h2 className="text-xl font-bold text-center">
@@ -900,7 +562,7 @@ const Users = () => {
                 />
 
                 <input
-                  type="text"
+                  type="password"
                   name="password"
                   placeholder="Password"
                   value={formData.password}
@@ -963,7 +625,51 @@ const Users = () => {
                   required
                 />
 
-                <button
+                               {/* File uploads (owner/shop images) */}
+                      <div className="grid grid-cols-2 gap-3">
+                       {/* Owner Image */}
+                       <label className="cursor-pointer">
+                         <div className="border border-dashed rounded-lg p-2 text-center hover:border-green-500 transition">
+                           <div className="text-xs font-medium text-gray-700">Owner Image</div>
+                           <div className="text-[10px] text-gray-500 mb-1">PNG / JPG</div>
+                     
+                           <div className="h-14 bg-gray-50 rounded flex items-center justify-center text-[11px] text-gray-400 px-1">
+                             {formData.ownerImage ? formData.ownerImage.name : "Upload"}
+                           </div>
+                         </div>
+                     
+                         <input
+                           type="file"
+                           name="ownerImage"
+                           accept="image/*"
+                           onChange={handleChange}
+                           className="hidden"
+                         />
+                       </label>
+                     
+                       {/* Shop Image */}
+                       <label className="cursor-pointer">
+                         <div className="border border-dashed rounded-lg p-2 text-center hover:border-green-500 transition">
+                           <div className="text-xs font-medium text-gray-700">Shop Image</div>
+                           <div className="text-[10px] text-gray-500 mb-1">PNG / JPG</div>
+                     
+                           <div className="h-14 bg-gray-50 rounded flex items-center justify-center text-[11px] text-gray-400 px-1">
+                             {formData.shopImage ? formData.shopImage.name : "Upload"}
+                           </div>
+                         </div>
+                     
+                         <input
+                           type="file"
+                           name="shopImage"
+                           accept="image/*"
+                           onChange={handleChange}
+                           className="hidden"
+                         />
+                       </label>
+                          </div>
+                     
+                     
+               <button
                   type="submit"
                   className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
                 >
