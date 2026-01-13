@@ -12,6 +12,7 @@ import Equipment from "../pages/Admin/Equipment";
 import Vehicles from "../pages/Admin/Vehicles";
 import Settings from "../pages/Admin/Settings";
 import Shops from "../pages/Admin/Shops";
+import CategoryManagement from "../pages/Admin/CategoryManagement";
 
 //farmer
 import FarmerDashboard from "../pages/Farmer/FarmerDashboard";
@@ -38,6 +39,7 @@ const AppRoutes = () => {
             <Route path="equipment" element={<Equipment />} />
             <Route path="vehicles" element={<Vehicles />} />  
             <Route path="shops" element={<Shops />} />
+            <Route path="categories" element={<CategoryManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>
  

@@ -687,7 +687,7 @@
   // export default Users;
 
   import { useState, useEffect, useMemo } from "react";
-import { IoSearch, IoAdd, IoClose } from "react-icons/io5";
+import { IoSearch, IoAdd, IoClose, IoCreate } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { VITE_API_BASE_URL } from "../../utils/api";
 
@@ -695,12 +695,13 @@ const Users = () => {
   // UI state
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [formType, setFormType] = useState(""); // "shopkeeper" | "owner"
+  const [formType, setFormType] = useState(""); // "shopkeeper" | "owner" | "edit-owner" | "edit-shopkeeper"
   const [selectedItemData, setSelectedItemData] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("owner"); // filter
   const [apiUsers, setApiUsers] = useState([]); // list from backend
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Pagination
   const PER_PAGE = 4; // as requested
@@ -790,6 +791,25 @@ const Users = () => {
     setShowModal(true);
   };
 
+  // --- Open Edit Modal ---
+  const openEditModal = (item) => {
+    const editFormType = selectedRole === "owner" ? "edit-owner" : "edit-shopkeeper";
+    setFormType(editFormType);
+    setSelectedItemData(item);
+    setFormData({
+      name: item.user?.name || "",
+      email: item.user?.email || "",
+      password: "",
+      shopName: item.shopName || "",
+      businessName: item.businessName || "",
+      address: item.address || "",
+      phoneNumber: item.phoneNumber || "",
+      aadharNumber: item.aadharNumber || "",
+      status: item.status || "active",
+    });
+    setShowModal(true);
+  };
+
   // client-side search + pagination
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -818,7 +838,7 @@ const Users = () => {
     e.preventDefault();
 
     // minimal validation
-    if (!formData.name || !formData.email || !formData.password || !formData.address) {
+    if (!formData.name || !formData.email || !formData.address) {
       toast.error("Please fill required fields");
       return;
     }
@@ -831,28 +851,48 @@ const Users = () => {
       return;
     }
 
+    // If it's a new user, require password
+    if (!formType.startsWith("edit") && !formData.password) {
+      toast.error("Password is required");
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       const url =
-        formType === "owner"
+        formType === "owner" || formType === "edit-owner"
           ? `${VITE_API_BASE_URL}/admin/owner`
           : `${VITE_API_BASE_URL}/admin/shopkeeper`;
 
-      // Use FormData because backend accepts form-data with files (ownerImage/shopImage)
+      // Use FormData because backend accepts form-data with files
       const form = new FormData();
       form.append("name", formData.name || "");
       form.append("email", formData.email || "");
-      form.append("password", formData.password || "");
+      if (formData.password) form.append("password", formData.password);
       form.append("address", formData.address || "");
       form.append("phoneNumber", formData.phoneNumber || "");
       form.append("aadharNumber", formData.aadharNumber || "");
-      if (formType === "owner") form.append("businessName", formData.businessName || "");
-      if (formType === "shopkeeper") form.append("shopName", formData.shopName || "");
+      if (formType === "owner" || formType === "edit-owner") {
+        form.append("businessName", formData.businessName || "");
+      }
+      if (formType === "shopkeeper" || formType === "edit-shopkeeper") {
+        form.append("shopName", formData.shopName || "");
+      }
+
+      if (formType.startsWith("edit")) {
+        form.append("status", formData.status || "active");
+      }
 
       if (formData.ownerImage) form.append("ownerImage", formData.ownerImage);
       if (formData.shopImage) form.append("shopImage", formData.shopImage);
 
-      const res = await fetch(url, {
-        method: "POST",
+      const method = formType.startsWith("edit") ? "PUT" : "POST";
+      const finalUrl = formType.startsWith("edit") 
+        ? `${url}/${selectedItemData._id}` 
+        : url;
+
+      const res = await fetch(finalUrl, {
+        method,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -862,17 +902,19 @@ const Users = () => {
       const data = await res.json();
 
       if (!data.success) {
-        toast.error(data.message || "Failed to create user");
+        toast.error(data.message || "Failed to save user");
         return;
       }
 
-      toast.success(data.message || "Created successfully");
+      toast.success(data.message || "Saved successfully");
       setShowModal(false);
       // refresh list
       fetchUsers();
     } catch (err) {
-      console.error("Create user error (safe):", err.message || err);
+      console.error("Save user error:", err.message || err);
       toast.error("Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1040,20 +1082,21 @@ const Users = () => {
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">User</th>
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">View</th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Edit</th>
                     </tr>
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
                     {loading ? (
                       <tr>
-                        <td colSpan="4" className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">
+                        <td colSpan="5" className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">
                           Loading...
                         </td>
                       </tr>
                     ) : paginated.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">
+                        <td colSpan="5" className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">
                           No users found.
                         </td>
                       </tr>
@@ -1105,8 +1148,21 @@ const Users = () => {
                             </td>
 
                             <td className="px-3 sm:px-6 py-4">
-                              <button onClick={() => handleViewDetails(item)} className="text-green-600 hover:text-green-700 font-medium text-xs sm:text-sm whitespace-nowrap">
-                                {detailsLoading ? "Loading..." : "View Details"}
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => handleViewDetails(item)} 
+                                  className="text-green-600 hover:text-green-700 font-medium text-xs sm:text-sm whitespace-nowrap px-2 py-1 hover:bg-green-50 rounded transition">
+                                  {detailsLoading ? "Loading..." : "View"}
+                                </button>
+                              </div>
+                            </td>
+
+                            <td className="px-3 sm:px-6 py-4">
+                              <button 
+                                onClick={() => openEditModal(item)} 
+                                className="text-green-600 hover:text-green-700 font-medium text-xs sm:text-sm whitespace-nowrap px-2 py-1 hover:bg-green-50 rounded transition flex items-center gap-1">
+                                <IoCreate size={14} />
+                                Edit
                               </button>
                             </td>
                           </tr>
@@ -1374,9 +1430,166 @@ const Users = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-2 sm:py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="w-full py-2 sm:py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium transition-colors disabled:opacity-50"
                 >
-                  {formType === "shopkeeper" ? "Create Shopkeeper" : "Create Owner"}
+                  {isSubmitting ? "Saving..." : (formType === "shopkeeper" ? "Create Shopkeeper" : "Create Owner")}
+                </button>
+              </form>
+            )}
+
+            {(formType === "edit-shopkeeper" || formType === "edit-owner") && (
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 mt-4">
+                <h2 className="text-lg sm:text-xl font-bold text-center">
+                  {formType === "edit-shopkeeper" ? "Edit Shopkeeper" : "Edit Owner"}
+                </h2>
+
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password (leave empty to keep current)"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+
+                {formType === "edit-shopkeeper" && (
+                  <input
+                    type="text"
+                    name="shopName"
+                    placeholder="Shop Name"
+                    value={formData.shopName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                )}
+
+                {formType === "edit-owner" && (
+                  <input
+                    type="text"
+                    name="businessName"
+                    placeholder="Business Name"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                )}
+
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  placeholder="Phone Number (10 digits)"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+
+                <input
+                  type="text"
+                  name="aadharNumber"
+                  placeholder="Aadhar Number (12 digits)"
+                  value={formData.aadharNumber}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+
+                {/* Status dropdown */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 text-sm bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                {/* File uploads (owner/shop images) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Owner Image */}
+                  <label className="cursor-pointer">
+                    <div className="border border-dashed rounded-lg p-2 text-center hover:border-green-500 transition">
+                      <div className="text-xs font-medium text-gray-700">Owner Image</div>
+                      <div className="text-[10px] text-gray-500 mb-1">PNG / JPG</div>
+
+                      <div className="h-14 bg-gray-50 rounded flex items-center justify-center text-[11px] text-gray-400 px-1 overflow-hidden">
+                        {formData.ownerImage ? formData.ownerImage.name : "Upload or skip"}
+                      </div>
+                    </div>
+
+                    <input
+                      type="file"
+                      name="ownerImage"
+                      accept="image/*"
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Shop Image */}
+                  <label className="cursor-pointer">
+                    <div className="border border-dashed rounded-lg p-2 text-center hover:border-green-500 transition">
+                      <div className="text-xs font-medium text-gray-700">Shop Image</div>
+                      <div className="text-[10px] text-gray-500 mb-1">PNG / JPG</div>
+
+                      <div className="h-14 bg-gray-50 rounded flex items-center justify-center text-[11px] text-gray-400 px-1 overflow-hidden">
+                        {formData.shopImage ? formData.shopImage.name : "Upload or skip"}
+                      </div>
+                    </div>
+
+                    <input
+                      type="file"
+                      name="shopImage"
+                      accept="image/*"
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-2 sm:py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? "Updating..." : "Update"}
                 </button>
               </form>
             )}
