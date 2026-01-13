@@ -9,11 +9,13 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import CategoryIcon from  "@mui/icons-material/Category"; 
 
 const menuItems = {
   // 🟢 Admin Menu
   admin: [
     { label: "Dashboard", path: "/admin/dashboard", icon: DashboardIcon },
+    { label: "Category", path: "/admin/categories", icon: CategoryIcon },
     { label: "Users", path: "/admin/users", icon: PeopleIcon },
     { label: "Equipment", path: "/admin/equipment", icon: AgricultureIcon },
     { label: "Vehicles", path: "/admin/vehicles", icon: LocalShippingIcon },
