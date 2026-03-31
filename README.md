@@ -213,5 +213,5 @@ See [LICENSE](LICENSE) for more details.
 
 ## 11. Developer
 
-* **Frontend Developer:** Srajal Vishwakarma — [GitHub](https://github.com/srajal591)
-* **Backend Developer:** Sapeksh Vishwakarma — [GitHub](https://github.com/sapeksh123)
+* Srajal Vishwakarma — [GitHub](https://github.com/srajal591)
+* Sapeksh Vishwakarma — [GitHub](https://github.com/sapeksh123)
